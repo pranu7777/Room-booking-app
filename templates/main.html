@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Page</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='/styles.css') }}">
+    <script type="module" src="{{ url_for('static', path='/firebase-login.js') }}"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+
+        #login-box {
+            padding: 20px;
+            background-color: #90EE90;
+            border-radius: 5px;
+        }
+
+        #login-box input[type="email"],
+        #login-box input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            margin: 6px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        #login-box button {
+            padding: 10px 20px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #45a049;
+            color: white;
+        }
+
+        #login-box button:hover {
+            background-color: #3b8241;
+        }
+
+        .all-button {
+            padding: 10px;
+            margin-right: 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            color: white;
+            background-color: #3b8241;
+        }
+
+        .all-button:hover {
+            background-color: #45a049;
+        }
+
+        #booking-list {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        #booking-list h3 {
+            margin-top: 0;
+        }
+
+        #booking-list ul {
+            padding: 0;
+        }
+
+        #booking-list li {
+            margin-bottom: 10px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            border-radius: 5px;
+        }
+
+        #booking-list li form {
+            display: inline;
+            margin-left: 10px;
+        }
+
+        #booking-list li form button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            background-color: #FF4500;
+            color: white;
+        }
+
+        #booking-list li form button:hover {
+            background-color: #b53721;
+        }
+
+        #room-details-container {
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+
+        #room-details-container h2 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        #room-details-container p {
+            margin: 5px 0;
+            color: #777;
+        }
+
+        #room-details-container p:first-child {
+            font-weight: bold;
+        }
+
+        .form-container {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+
+        .form-container label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .form-container select, 
+        .form-container button {
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .form-container button {
+            cursor: pointer;
+            background-color: #45a049;
+            color: white;
+            border: none;
+        }
+
+        .form-container button:hover {
+            background-color: #3b8241;
+        }
+        /* Style the list of rooms */
+        ul {
+         list-style-type: none; /* Remove bullet points */
+         padding: 0;
+            }
+
+        /* Style each room item */
+        li {
+         margin-bottom: 10px; /* Add some space between each room */
+         padding: 10px;
+         border: 1px solid #ddd;
+         border-radius: 1px;
+         background-color: #fff;
+            }
+
+    /* Style the link for room name */
+        li a {
+         text-decoration: none;
+         color: blue; /* Change link color */
+         font-weight: bold;
+         font-size: 15px;
+        }
+
+    /* Style room info */
+        .room-info {
+       color: #777; /* Change color */
+        font-size: 15px;
+        }
+
+/* Style bookings list for each room */
+        li ul {
+        padding: 0;
+        margin-top: 2px; /* Add some space between room info and bookings */
+        }
+
+        /* Style each booking item */
+        li ul li {
+       margin-bottom: 2px;
+      color: #555; /* Change color */
+        }
+    </style>
+</head>
+<body>
+    <div id="login-box" hidden="true">
+        <label for="email">Email:</label>
+        <input type="email" name="email" id="email"><br>
+        <label for="password">Password:</label>
+        <input type="password" name="password" id="password"><br>
+        <button id="login">Login</button>
+        <button id="sign-up">Sign Up</button>
+    </div>
+    <button id="sign-out" hidden="true">Sign out</button>
+
+    {% if user_token %}
+        <p>User email: {{ user_token.email }}</p>
+        <hr>
+        <div style="display: flex;">
+            <a href="/addRoom" class="all-button">Add Room</a>
+            <a href="/bookRoom" class="all-button">Book a Room</a>
+            
+        </div>
+
+         <!-- Form for adding a new room -->
+    <div id="add-room-form" style="display: none;">
+        <h3>Add a New Room</h3>
+        <form id="new-room-form">
+            <label for="room-name">Room Name:</label><br>
+            <input type="text" id="room-name" name="roomName"><br>
+            <label for="room-capacity">Room Capacity:</label><br>
+            <input type="number" id="room-capacity" name="roomCapacity"><br>
+            <label for="room-price">Room price:</label><br>
+            <input type="text" id="room-price" name="roomPrice"><br>
+            <button type="submit">Add Room</button>
+        </form>
+    </div>
+    {% if rooms %}
+    <h2>List of Rooms</h2>
+    <ul>
+        {% for room in rooms %}
+            <li>
+                <!-- Add a link to view bookings for this room -->
+                <a href="/roomBookings/{{ room.room_name }}">{{ room.room_name }}</a>
+                <span class="room-info">Capacity: {{ room.room_capacity }}, Price: {{ room.room_price }}</span>
+                <!-- Delete form for this room -->
+                <form action="/delete-room/{{ room.room_name }}" method="post" style="display: inline;">
+                    <button type="submit">Delete</button>
+                </form>
+                
+                <!-- Display bookings for this room -->
+                <ul>
+                    {% for booking in room.bookings %}
+                        <li>
+                            Date: {{ booking.date }}, Time: {{ booking.time }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No rooms available.</p>
+{% endif %}
+
+
+        <!-- Booking List Section -->
+        <div id="booking-list">
+            <h3>Your Bookings</h3>
+            <ul>
+                {% if user_bookings %}
+                    {% for booking in user_bookings %}
+                        <li>
+                            {{ booking.room_name }} - Date: {{ booking.date }}, Time: {{ booking.time }}
+                            <form action="/deleteBooking" method="post">
+                                <input type="hidden" name="booking_id" value="{{ booking.booking_id }}">
+                                <button type="submit">Delete</button>
+                            </form>
+                            <a href="/editBooking/{{ booking.booking_id }}">Edit</a>
+                        </li>
+                    {% endfor %}
+                {% else %}
+                    <li>No bookings found.</li>
+                {% endif %}
+            </ul>
+        </div>
+    {% endif %}
+
+    {% if user_token %}
+    <div class="form-container">
+        <h3>View Bookings for Specific Room</h3>
+        <form action="/userBookings" method="post">
+            <label for="roomName">Select Room:</label>
+            <select id="roomName" name="roomName">
+                    {% for room in listOfrooms %}
+                        <option value="{{ room.room_name }}">{{ room.room_name }}</option>
+                    {% endfor %}
+            </select>
+            <button type="submit">View Bookings</button>
+        </form>
+    </div>
+    {% endif %}
+
+    <script>
+        // Show add room form when the link is clicked
+        document.querySelector('.all-button[href="/addRoom"]').addEventListener('click', function(event) {
+            event.preventDefault();
+            document.getElementById('add-room-form').style.display = 'block';
+        });
+
+        // Handle form submission
+        document.getElementById('new-room-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const roomName = formData.get('roomName');
+            const roomCapacity = formData.get('roomCapacity');
+            const roomPrice = formData.get('roomPrice');
+
+            // Send room data to the backend
+            fetch('/addRoom', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ roomName, roomCapacity, roomPrice })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to add room');
+                }
+                alert('Room added successfully');
+                // Optionally, clear the form
+                document.getElementById('new-room-form').reset();
+                // Reload the page to update the room list
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error('Error adding room:', error);
+                alert('Failed to add room. Please try again.');
+            });
+        });
+    </script>
+    {% if user_token %}`
+    <div class="form-container">
+        <h3>Filter Bookings by Date</h3>
+        <form action="/filterBookingsByDate" method="post">
+            <label for="filterDate">Select Date:</label>
+            <input type="date" id="filterDate" name="filterDate">
+            <button type="submit">Filter</button>
+        </form>
+    </div>
+    {% endif %}
+</body>
+</html>
